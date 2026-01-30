@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Film Önerisi ve Yorum Analizi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px; /* Genişlik artırıldı */
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .filter-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .checkbox-item:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        /* Seçili filtre stilini ekliyoruz */
+        .checkbox-item.selected {
+            background-color: #e4e7ff;
+            border-color: #667eea;
+            font-weight: 600;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: #667eea;
+            width: 18px;
+            height: 18px;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 30px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .recommendations-page {
+            display: none;
+        }
+
+        .movie-grid {
+            /* Grid'den Flexbox'a geçiş yapıyoruz */
+            display: flex;
+            flex-wrap: wrap; /* Filmler sığmazsa alt satıra geçsin */
+            gap: 2rem; /* Film kartları arasındaki boşluk */
+            justify-content: center; /* Kartları yatayda ortala */
+            margin-top: 30px;
+        }
+
+        .movie-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            
+            /* Flexbox ayarları: 3'lü dizilim için */
+            flex: 1 1 calc(33.333% - 2rem);
+            
+            /* Kartın çok küçülmesini engelle */
+            min-width: 280px;
+            max-width: calc(33.333% - 2rem);
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .movie-info {
+            padding: 20px;
+        }
+
+        .movie-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .movie-details {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .movie-details strong {
+            color: #333;
+        }
+
+        .reviews-btn {
+            width: 100%;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+
+        .reviews-btn:hover {
+            background: #5568d3;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-bottom: 20px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        .review-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .review-text {
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .sentiment {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .sentiment.positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .sentiment.neutral {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .sentiment.negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #721c24;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        /* Responsive Tasarım İyileştirmeleri */
+        /* Ekran küçüldüğünde (örneğin tablet) 2'li dizilime geç */
+        @media (max-width: 1100px) {
+            .movie-card {
+                flex-basis: calc(50% - 2rem);
+                max-width: calc(50% - 2rem);
+            }
+        }
+
+        /* Ekran daha da küçüldüğünde (mobil) tekli dizilime geç */
+        @media (max-width: 768px) {
+            .movie-card {
+                flex-basis: 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Ana Filtre Sayfası -->
+    <div class="container" id="filterPage">
+        <h1>🎬 Film Önerisi</h1>
+        <p class="subtitle">Tercihlerinize göre size en uygun filmleri bulalım<br>
+        <small style="color: #999; font-size: 0.9em;">Filtre seçmeden de rastgele filmler önerebiliriz!</small></p>
+        
+        <form id="filterForm">
+            <div class="filter-group">
+                <label>Film Türü (Birden fazla seçebilirsiniz)</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre-aksiyon" name="genre" value="aksiyon">
+                        <label for="genre-aksiyon">Aksiyon</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre-komedi" name="genre" value="komedi">
+                        <label for="genre-komedi">Komedi</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre-romantik" name="genre" value="romantik">
+                        <label for="genre-romantik">Romantik</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre-korku" name="genre" value="korku">
+                        <label for="genre-korku">Korku</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre-bilim-kurgu" name="genre" value="bilim-kurgu">
+                        <label for="genre-bilim-kurgu">Bilim Kurgu</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre-drama" name="genre" value="drama">
+                        <label for="genre-drama">Drama</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre-animasyon" name="genre" value="animasyon">
+                        <label for="genre-animasyon">Animasyon</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Film Uzunluğu (Birden fazla seçebilirsiniz)</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="duration-0-60" name="duration" value="0-60">
+                        <label for="duration-0-60">60 dakikadan kısa</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="duration-60-90" name="duration" value="60-90">
+                        <label for="duration-60-90">60-90 dakika arası</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="duration-90-120" name="duration" value="90-120">
+                        <label for="duration-90-120">90-120 dakika arası</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="duration-120+" name="duration" value="120+">
+                        <label for="duration-120+">120 dakikadan fazla</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Film Yönetmeni (Birden fazla seçebilirsiniz)</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="director-nolan" name="director" value="Christopher Nolan">
+                        <label for="director-nolan">Christopher Nolan</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="director-spielberg" name="director" value="Steven Spielberg">
+                        <label for="director-spielberg">Steven Spielberg</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="director-tarantino" name="director" value="Quentin Tarantino">
+                        <label for="director-tarantino">Quentin Tarantino</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="director-coppola" name="director" value="Francis Ford Coppola">
+                        <label for="director-coppola">Francis Ford Coppola</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="director-scorsese" name="director" value="Martin Scorsese">
+                        <label for="director-scorsese">Martin Scorsese</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="director-other" name="director" value="other">
+                        <label for="director-other">Diğer</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Filmin Çıkış Tarihi (Birden fazla seçebilirsiniz)</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="year-pre-1950" name="releaseDate" value="pre-1950">
+                        <label for="year-pre-1950">1950 öncesi</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="year-1950-1975" name="releaseDate" value="1950-1975">
+                        <label for="year-1950-1975">1950-1975 arası</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="year-1975-2000" name="releaseDate" value="1975-2000">
+                        <label for="year-1975-2000">1975-2000 arası</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="year-2000-2010" name="releaseDate" value="2000-2010">
+                        <label for="year-2000-2010">2000-2010 arası</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="year-2010+" name="releaseDate" value="2010+">
+                        <label for="year-2010+">2010 sonrası</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Hedef Kitle (Birden fazla seçebilirsiniz)</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="audience-cocuk" name="audience" value="cocuk">
+                        <label for="audience-cocuk">Çocuk</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="audience-yetiskin" name="audience" value="yetiskin">
+                        <label for="audience-yetiskin">Yetişkin</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="audience-genel" name="audience" value="genel">
+                        <label for="audience-genel">Genel</label>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button type="button" id="clearFiltersBtn" class="btn" style="flex: 3; background: #e74c3c; margin-top: 0;" onmouseover="this.style.backgroundColor='#c0392b'" onmouseout="this.style.backgroundColor='#e74c3c'">Filtreleri Temizle</button>
+                <button type="submit" class="btn" style="flex: 7; margin-top: 0;">🎥 Film Öner</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Film Önerileri Sayfası -->
+    <div class="container recommendations-page" id="recommendationsPage">
+        <button class="back-btn" onclick="goBack()">← Geri Dön</button>
+        <h1>🌟 Size Özel Film Önerileri</h1>
+        <div id="loadingRecommendations" class="loading">Filmler yükleniyor</div>
+        <div class="movie-grid" id="movieGrid"></div>
+    </div>
+
+    <!-- Yorumlar Sayfası -->
+    <div class="container recommendations-page" id="reviewsPage">
+        <button class="back-btn" onclick="goBackToRecommendations()">← Önerilere Dön</button>
+        <h1 id="reviewsMovieTitle">Film Yorumları</h1>
+        <div id="loadingReviews" class="loading">Yorumlar yükleniyor</div>
+        <div id="reviewsContainer"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+
+        function showPage(pageId) {
+            document.getElementById('filterPage').style.display = 'none';
+            document.getElementById('recommendationsPage').style.display = 'none';
+            document.getElementById('reviewsPage').style.display = 'none';
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        function goBack() {
+            showPage('filterPage');
+        }
+
+        function goBackToRecommendations() {
+            showPage('recommendationsPage');
+        }
+
+        document.getElementById('filterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const getCheckedValues = (name) => {
+                const checkboxes = document.querySelectorAll(`input[name="${name}"]:checked`);
+                return Array.from(checkboxes).map(cb => cb.value);
+            };
+
+            const filters = {
+                genres: getCheckedValues('genre'),
+                durations: getCheckedValues('duration'),
+                directors: getCheckedValues('director'),
+                releaseDates: getCheckedValues('releaseDate'),
+                audiences: getCheckedValues('audience')
+            };
+
+            // Filtre kontrolü kaldırıldı - artık zorunlu değil
+            console.log('Seçili filtreler:', filters);
+
+            showPage('recommendationsPage');
+            document.getElementById('loadingRecommendations').style.display = 'block';
+            document.getElementById('movieGrid').innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_URL}/api/recommend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(filters)
+                });
+
+                if (!response.ok) {
+                    throw new Error('API isteği başarısız oldu');
+                }
+
+                const movies = await response.json();
+                document.getElementById('loadingRecommendations').style.display = 'none';
+                
+                if (movies.length === 0) {
+                    document.getElementById('movieGrid').innerHTML = 
+                        '<div class="no-results">Seçtiğiniz filtrelere uygun film bulunamadı. Lütfen farklı filtreler deneyin.</div>';
+                } else {
+                    displayMovies(movies);
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                document.getElementById('loadingRecommendations').style.display = 'none';
+                document.getElementById('movieGrid').innerHTML = 
+                    '<div class="error-message">❌ Filmler yüklenirken bir hata oluştu. Backend sunucusunun çalıştığından emin olun!</div>';
+            }
+        });
+
+        function displayMovies(movies) {
+            const grid = document.getElementById('movieGrid');
+            grid.innerHTML = '';
+
+            movies.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                card.innerHTML = `
+                    <img src="${movie.poster}" alt="${movie.title}" class="movie-poster" 
+                         onerror="this.src='https://via.placeholder.com/500x750?text=Film+Posteri'">
+                    <div class="movie-info">
+                        <div class="movie-title">${movie.title}</div>
+                        <div class="movie-details"><strong>Tür:</strong> ${movie.genre}</div>
+                        <div class="movie-details"><strong>Süre:</strong> ${movie.duration} dakika</div>
+                        <div class="movie-details"><strong>Yönetmen:</strong> ${movie.director}</div>
+                        <div class="movie-details"><strong>Çıkış:</strong> ${movie.year}</div>
+                        <div class="movie-details"><strong>Hedef:</strong> ${movie.audience === 'cocuk' ? 'Çocuk' : movie.audience === 'yetiskin' ? 'Yetişkin' : 'Genel'}</div>
+                        <button class="reviews-btn" onclick='showReviews(${JSON.stringify(movie.id)}, ${JSON.stringify(movie.title)})'>
+                            💬 Yorumları Gör
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        async function showReviews(movieId, movieTitle) {
+            showPage('reviewsPage');
+            document.getElementById('reviewsMovieTitle').textContent = movieTitle + ' - Yorumlar';
+            document.getElementById('loadingReviews').style.display = 'block';
+            document.getElementById('reviewsContainer').innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_URL}/api/reviews/${movieId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Yorumlar yüklenemedi');
+                }
+
+                const reviews = await response.json();
+                document.getElementById('loadingReviews').style.display = 'none';
+                displayReviews(reviews);
+            } catch (error) {
+                console.error('Hata:', error);
+                document.getElementById('loadingReviews').style.display = 'none';
+                document.getElementById('reviewsContainer').innerHTML = 
+                    '<div class="error-message">❌ Yorumlar yüklenirken bir hata oluştu.</div>';
+            }
+        }
+
+        function displayReviews(reviews) {
+            const container = document.getElementById('reviewsContainer');
+            container.innerHTML = '';
+
+            if (reviews.length === 0) {
+                container.innerHTML = '<div class="no-results">Bu film için henüz yorum bulunmamaktadır.</div>';
+                return;
+            }
+
+            reviews.forEach(review => {
+                const card = document.createElement('div');
+                card.className = 'review-card';
+                
+                const sentimentText = {
+                    'positive': 'Olumlu',
+                    'neutral': 'Nötr',
+                    'negative': 'Olumsuz'
+                };
+
+                card.innerHTML = `
+                    <div class="review-text">${review.text}</div>
+                    <span class="sentiment ${review.sentiment}">
+                        ${review.sentiment === 'positive' ? '😊' : review.sentiment === 'neutral' ? '😐' : '😞'} 
+                        ${sentimentText[review.sentiment]}
+                    </span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Sayfa yüklendiğinde backend test et
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/test`);
+                if (response.ok) {
+                    console.log('✅ Backend bağlantısı başarılı!');
+                }
+            } catch (error) {
+                console.error('⚠️ Backend bağlantısı kurulamadı. Lütfen backend sunucusunu başlatın!');
+            }
+        });
+
+        // Seçili filtrelere 'selected' class'ı ekleyip kaldırma
+        document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (event) => {
+                const parentItem = event.target.closest('.checkbox-item');
+                parentItem.classList.toggle('selected', event.target.checked);
+            });
+        });
+
+        // Filtre kutusunun tamamına tıklanabilir özellik ekleme
+        document.querySelectorAll('.checkbox-item').forEach(item => {
+            item.addEventListener('click', (event) => {
+                // Eğer zaten input veya label'a tıklandıysa tekrar tetikleme
+                if (event.target.tagName === 'INPUT' || event.target.tagName === 'LABEL') return;
+
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                if (checkbox) checkbox.click(); // Checkbox'a programatik olarak tıkla
+            });
+        });
+
+        // Filtreleri Temizle Butonu İşlevi
+        document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                // Görsel seçimi kaldır
+                cb.closest('.checkbox-item').classList.remove('selected');
+            });
+        });
+
+    </script>
+</body>
+</html>
