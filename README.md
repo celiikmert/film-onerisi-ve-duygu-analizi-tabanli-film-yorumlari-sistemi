@@ -4,6 +4,15 @@ Bu proje, kullanıcıların film yorumlarını analiz ederek **duygu durumların
 
 ---
 
+## 🎓 Akademik Kapsam
+
+Bu proje, **Bitirme Projesi ve Tez Çalışması** kapsamında geliştirilmiştir.
+Bilişim Sistemleri Mühendisliği lisans programı çerçevesinde, **doğal dil işleme (NLP)**, **veri analizi** ve **öneri sistemleri** konularının uygulamalı olarak ele alınmasını amaçlamaktadır.
+
+Proje; akademik araştırma, yazılım geliştirme ve gerçek dünya verileriyle çalışma becerilerini bir arada göstermeyi hedefler.
+
+---
+
 ## 🚀 Projenin Amacı
 
 * Film yorumlarını otomatik olarak analiz etmek
@@ -46,6 +55,26 @@ film-onerisi-ve-duygu-analizi-tabanli-film-yorumlari-sistemi/
 ---
 
 ## ⚙️ Kurulum ve Çalıştırma
+
+> ⚠️ **Önemli Not (TMDB API Anahtarı):**
+> Bu projede film verilerini çekmek için **The Movie Database (TMDB) API** kullanılmaktadır.
+> Güvenlik nedeniyle **API anahtarı (API Key)** GitHub paylaşımında bilinçli olarak silinmiştir.
+>
+> Projeyi çalıştırmadan önce, TMDB üzerinden kendi API anahtarınızı almanız ve kod içerisindeki ilgili alanlara eklemeniz gerekmektedir.
+
+### 🔑 TMDB API Anahtarı Nasıl Eklenir?
+
+1. [https://www.themoviedb.org](https://www.themoviedb.org) adresine gidin ve hesap oluşturun
+2. **Settings → API** bölümünden bir API Key alın
+3. Proje içindeki aşağıdaki dosyalarda API anahtarını ekleyin:
+
+```python
+TMDB_API_KEY = "BURAYA_KENDI_API_KEYINIZI_YAZIN"
+```
+
+> 📌 API anahtarı bulunan dosyalar `.gitignore` içerisine eklenmeli veya GitHub'a yüklenmemelidir.
+
+---
 
 1. Repoyu klonlayın:
 
